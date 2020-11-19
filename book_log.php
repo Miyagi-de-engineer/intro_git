@@ -1,5 +1,7 @@
 <?php
 
+// 今後はSQLを用いたDB操作の内容も入ってくるよ
+
 function createReview()
 {
     echo '読書ログを登録してください' . PHP_EOL;
