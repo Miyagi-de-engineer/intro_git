@@ -1,8 +1,50 @@
 <?php
 
+$reviews = [];
+$link = dbConnect();
 // 今後はSQLを用いたDB操作の内容も入ってくるよ
-
 // MySQLへの接続を開始する
+
+function validate($review)
+{
+    $errors = [];
+
+    // 書籍名が正しく入力されているかチェック
+    if (!strlen($review['title'])) {
+        $errors['title'] = '書籍名を入力してください';
+    } elseif (strlen($review['title'] > 255)) {
+        $errors['title'] = '書籍名は255文字以内で入力してください';
+    }
+
+    // 著者名のバリデーションチェック
+    if (!strlen($review['author'])) {
+        $errors['author'] = '著者名を入力してください';
+    } elseif (strlen($review['author'] > 100)) {
+        $errors['author'] = '著者名は100文字以下で入力してください';
+    }
+
+    // 読書状況のバリデーションチェック
+    static $situation = ['未読', '読んでる', '読了'];
+    if (!strlen($review['status'])) {
+        $errors['status'] = '読書状況を入力してください';
+    } elseif (!in_array($review['status'], $situation)) {
+        $errors['status'] = '未読、読んでる、読了のいずれかを入力してください';
+    }
+
+    //評価のバリデーションチェック
+    if ($review['score'] < 1 || $review['score'] > 5) {
+        $errors['score'] = '評価は１から５の整数を入力してください';
+    }
+
+    // 感想のバリデーションチェック
+    if (!strlen($review['summary'])) {
+        $errors['summary'] = '感想を入力してください';
+    } elseif (strlen($review['summary'] > 100)) {
+        $errors['summary'] = '感想は100文字以下で入力してください';
+    }
+
+    return $errors;
+}
 
 function dbConnect()
 {
@@ -17,32 +59,57 @@ function dbConnect()
     return $link;
 }
 
-function createReview()
+function createReview($link)
 {
+    $review = [];
     echo '読書ログを登録してください' . PHP_EOL;
     echo '書籍名：';
-    $title = trim(fgets(STDIN));
+    $review['title'] = trim(fgets(STDIN));
 
     echo '著者名：';
-    $author = trim(fgets(STDIN));
+    $review['author'] = trim(fgets(STDIN));
 
     echo '読書状況（未読，読んでる，読了）：';
-    $status = trim(fgets(STDIN));
+    $review['status'] = trim(fgets(STDIN));
 
     echo '評価（５点満点の整数）：';
-    $score = trim(fgets(STDIN));
+    $review['score'] = (int)trim(fgets(STDIN));
 
     echo '感想：';
-    $summary = trim(fgets(STDIN));
+    $review['summary'] = trim(fgets(STDIN));
 
-    echo '登録が完了しました' . PHP_EOL . PHP_EOL;
-    return [
-        'title' => $title,
-        'author' => $author,
-        'status' => $status,
-        'score' => $score,
-        'summary' => $summary,
-    ];
+    $validated = validate($review);
+    if (count($validated) > 0) {
+        foreach ($validated as $error) {
+            echo $error . PHP_EOL;
+        }
+        return;
+    }
+
+    $sql = <<<EOT
+    INSERT INTO reviews(
+        title,
+        author,
+        status,
+        score,
+        summary
+    ) VALUES (
+        "{$review['title']}",
+        "{$review['author']}",
+        "{$review['status']}",
+        "{$review['score']}",
+        "{$review['summary']}"
+    )
+    EOT;
+
+    $result = mysqli_query($link, $sql);
+
+    if ($result) {
+        echo 'データを追加しました' . PHP_EOL;
+    } else {
+        echo 'Error:データの追加に失敗しました' . PHP_EOL;
+        echo 'DebuggingError:' . mysqli_error($link) . PHP_EOL;
+    }
 }
 
 function listReview($reviews)
@@ -58,10 +125,6 @@ function listReview($reviews)
     }
 }
 
-$reviews = [];
-
-$link = dbConnect();
-
 while (true) {
 
     echo '1.読書ログを登録' . PHP_EOL;
@@ -73,21 +136,13 @@ while (true) {
 
     if ($num === '1') {
         // 読書ログを登録する
-        $reviews[] = createReview();
+        createReview($link);
     } else if ($num === '2') {
         // 読書ログを表示
         listReview($reviews);
     } else if ($num === '9') {
         // アプリケーションを終了する
         mysqli_close($link);
-        echo 'データベースとの接続を切断しました' . PHP_EOL;
-        echo 'アプリケーションを終了します';
         break;
     }
 }
-
-// echo '書籍名：銀河鉄道の夜' . PHP_EOL;
-// echo '著者名：宮沢賢治' . PHP_EOL;
-// echo '読書状況：読了' . PHP_EOL;
-// echo '評価：５' . PHP_EOL;
-// echo '感想：本当の幸せとはなんだろうかと考えさせられる作品だった。' . PHP_EOL;
