@@ -1,10 +1,5 @@
 <?php
 
-$reviews = [];
-$link = dbConnect();
-// 今後はSQLを用いたDB操作の内容も入ってくるよ
-// MySQLへの接続を開始する
-
 function validate($review)
 {
     $errors = [];
@@ -55,7 +50,7 @@ function dbConnect()
         echo 'Debugging error:' . mysqli_connect_error() . PHP_EOL;
         exit;
     }
-    echo 'データベースに接続しました' . PHP_EOL;
+    // echo 'データベースに接続しました' . PHP_EOL;
     return $link;
 }
 
@@ -112,10 +107,15 @@ function createReview($link)
     }
 }
 
-function listReview($reviews)
+function listReview($link)
 {
-    echo '読書ログを表示します' . PHP_EOL;
-    foreach ($reviews as $review) {
+    // SQL文を用いてreviewsテーブルからデータを取得
+    $sql = 'SELECT * FROM reviews';
+    $results = mysqli_query($link, $sql);
+
+    echo '登録されている読書ログを表示します' . PHP_EOL;
+
+    while ($review = mysqli_fetch_assoc($results)) {
         echo '書籍名：' . $review['title'] . PHP_EOL;
         echo '著者名' . $review['author'] . PHP_EOL;
         echo '読書状況：' . $review['status'] . PHP_EOL;
@@ -123,7 +123,11 @@ function listReview($reviews)
         echo '感想：' . $review['summary'] . PHP_EOL;
         echo '--------------------------' . PHP_EOL;
     }
+    // メモリの解放
+    mysqli_free_result($results);
 }
+
+$link = dbConnect();
 
 while (true) {
 
@@ -139,7 +143,7 @@ while (true) {
         createReview($link);
     } else if ($num === '2') {
         // 読書ログを表示
-        listReview($reviews);
+        listReview($link);
     } else if ($num === '9') {
         // アプリケーションを終了する
         mysqli_close($link);

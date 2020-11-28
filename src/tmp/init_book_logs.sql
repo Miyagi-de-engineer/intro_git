@@ -1,11 +1,11 @@
 DROP TABLE IF EXISTS book_logs;
 
-CREATE TABLE book_logs(
+CREATE TABLE reviews(
     id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255),
-    author VARCHAR(255),
-    situation VARCHAR(255),
+    author VARCHAR(100),
+    status VARCHAR(10),
     score INTEGER,
-    summary TEXT,
+    summary VARCHAR(100),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) DEFAULT CHARACTER SET=utf8mb4;
