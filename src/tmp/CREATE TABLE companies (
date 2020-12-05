@@ -31,11 +31,11 @@ INSERT INTO reviews(
     author,
     status,
     score,
-    summary,
-) VALUES(
-    'WebEngineer'
-    'Katsumata',
-    'reading',
-    '80',
-    'osusumedesu'
+    summary
+) VALUES (
+    'Disney',
+    'Wolt',
+    'complete',
+    100,
+    'specialDay'
 );
