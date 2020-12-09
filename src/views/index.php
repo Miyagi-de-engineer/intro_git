@@ -1,12 +1,22 @@
 <a href="new.php">読書ログを登録する</a>
 <main>
-    <section class="">
-        <div class="">
-            <h2>新世界より</h2>
-            <div>貴志祐介/読了/５点</div>
-            <p>
-                寝食を忘れ、むさぼるように読んでしまった。圧倒的な神本。感情を揺さぶられる。
-            </p>
-        </div>
-    </section>
+    <?php if (count($reviews) > 0) : ?>
+        <?php foreach ($reviews as $review) : ?>
+            <section>
+                <div>
+                    <h2><?php echo escape($review['title']); ?></h2>
+                    <div>
+                        <?php echo escape($review['author']); ?>&nbsp;/&nbsp;
+                        <?php echo escape($review['status']); ?>&nbsp;/&nbsp;
+                        <?php echo escape($review['score']); ?>点
+                    </div>
+                    <p>
+                        <?php echo nl2br(escape($review['summary']), false); ?>
+                    </p>
+                </div>
+            </section>
+        <?php endforeach; ?>
+    <?php else : ?>
+        <p>登録されている読書ログはありません</p>
+    <?php endif; ?>
 </main>
